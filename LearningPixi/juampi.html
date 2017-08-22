@@ -1,0 +1,123 @@
+<html>
+<head>
+  <title>Nacimos en los sevenPIXIS</title>
+  <script src="pixi.min.js"></script>
+</head>
+
+<body>
+  <script>
+    //Aliases
+    var autoDetectRenderer = PIXI.autoDetectRenderer,
+        resources = PIXI.loader.resources,
+        loader = PIXI.loader,
+        Rectangle = PIXI.Rectangle,
+        Sprite = PIXI.Sprite,
+        TextureCache = PIXI.utils.TextureCache;
+
+    var renderer = autoDetectRenderer(512,512);
+    var state;
+    document.body.appendChild(renderer.view);
+
+    var stage = new PIXI.Container();
+
+    renderer.render(stage);
+
+    //Todo esto para arriba es para crear un canvas negro 512x512
+
+    loader
+      .add("images/treasureHunter.json")
+      .load(setup);
+
+    function setup() {
+      //There are 3 ways to make sprites from textures atlas frames
+
+      //1. Access the `TextureCache` directly
+      var dungeonTexture = TextureCache["dungeon.png"];
+      dungeon = new Sprite(dungeonTexture);
+      stage.addChild(dungeon);
+
+      //2. Access the texture using the loader's `resources`:
+      explorer = new Sprite(
+        resources["images/treasureHunter.json"].textures["explorer.png"]
+      );
+      explorer.x = 68;
+
+      //Center the explorer vertically
+      explorer.y = stage.height / 2 - explorer.height / 2;
+      stage.addChild(explorer);
+
+      //3. Create an optional alias called `id` for all the texture atlas
+      //frame id textures.
+      id = PIXI.loader.resources["images/treasureHunter.json"].textures;
+
+      //Make the treasure box using the alias
+      treasure = new Sprite(id["treasure.png"]);
+      stage.addChild(treasure);
+
+      //Position the treasure next to the right edge of the canvas
+      treasure.x = stage.width - treasure.width - 48;
+      treasure.y = stage.height / 2 - treasure.height / 2;
+      stage.addChild(treasure);
+
+      //Make the exit door
+      door = new Sprite(id["door.png"]);
+      door.position.set(32, 0);
+      stage.addChild(door);
+
+      //Make the blobs
+      var numberOfBlobs = 6,
+          spacing = 48,
+          xOffset = 150;
+
+      //Make as many blobs as there are `numberOfBlobs`
+      for (var i = 0; i < numberOfBlobs; i++) {
+
+        //Make a blob
+        var blob = new Sprite(id["blob.png"]);
+
+        //Space each blob horizontally according to the `spacing` value.
+        //`xOffset` determines the point from the left of the screen
+        //at which the first blob should be added.
+        var x = spacing * i + xOffset;
+
+        //Give the blob a random y position
+        //(`randomInt` is a custom function - see below)
+        var y = randomInt(0, stage.height - blob.height);
+
+        //Set the blob's position
+        blob.x = x;
+        blob.y = y;
+
+        //Add the blob sprite to the stage
+        stage.addChild(blob);
+      }
+      state = play;
+      gameLoop();
+    }
+
+    //The `randomInt` helper function
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function gameLoop() {
+      //Hace que se ejecute 60 veces por segundo el contenido de esta función
+      requestAnimationFrame(gameLoop);
+
+      state();
+
+      //Render the stage
+      renderer.render(stage);
+    }
+
+    function play() {
+      explorer.vx = 1;
+      explorer.vy = 1;
+
+      explorer.x += explorer.vx;
+      explorer.y += explorer.vy;
+    }
+  </script>
+</body>
+
+</html>
