@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Somos Pixies, somos pixies</title>
+</head>
+  <script src="pixi.min.js"></script>
+<body>
+  <script>
+    //Creo un renderer
+    var renderer = PIXI.autoDetectRenderer(1000,1000);
+    //Agrego ese renderer al documento html
+    document.body.appendChild(renderer.view);
+    //Creo el stage
+    var stage = new PIXI.Container();
+    //Le decimos al renderer que renderice el stage
+    //renderer.render(stage);
+    //Algunas pelotudeces
+    renderer.autoResize = true;
+    //renderer.resize(512,512);
+
+    //Para crear un sprite (imagen) y cargarla en el render
+
+    var texture = PIXI.utils.TextureCache["imagen/forroman.jpg"];
+    var sprite = new PIXI.Sprite(texture);
+
+    PIXI.loader
+      .add("images/forroman1.jpg")
+      .load(setup);
+
+    //Esta funcion setup() corre cuando la imagen haya cargado
+    function setup(){
+      //Creamos el sprite
+      var forroman = new PIXI.Sprite(
+        PIXI.loader.resources["images/forroman1.jpg"].texture
+      );
+      //Lo agregamos al stage
+      stage.addChild(forroman);
+      //Le decimos al renderer que renderice el stage
+      renderer.render(stage);
+    }
+
+  </script>
+</body>
+</html>
