@@ -16,13 +16,11 @@
         Text = PIXI.Text;
 
     //Creamos las gameScenes
-    var gameScene = new Container();
-    stage.addChild(gameScene);
+    var gameScene;
+    var gameOverScene;
 
-    var gameOverScene = new Container();
-    stage.addChild(gameOverScene);
-    //Le ponemos para que no sea visible al principio
-    gameOverScene.visible = false;
+    var idAnimation;
+
 
     document.body.appendChild(renderer.view);
 
@@ -38,6 +36,7 @@
     var tieneBaston = false;
     var reyVestido = false;
     var tios = [];
+    var presionoEnter = false;
 
 
 
@@ -51,12 +50,28 @@
     var left = keyboard(37),
       up = keyboard(38),
       right = keyboard(39),
-      down = keyboard(40);
+      down = keyboard(40),
+      enter = keyboard(13);
 
 
     //Esta funcion setup() corre cuando la imagen haya cargado
 
-    function setup(){
+    function setup() {
+
+      tieneCorona = false;
+      tieneCapa = false;
+      tieneBaston = false;
+      tios = [];
+      reyVestido = false;
+
+      gameScene = new Container();
+      stage.addChild(gameScene);
+
+      gameOverScene = new Container();
+      stage.addChild(gameOverScene);
+
+      //Le ponemos para que no sea visible al principio
+      gameOverScene.visible = false;
 
       //Creamos una variable que referencie todo el atlas
       atlas = PIXI.loader.resources["images/theLegendOfCorvalan.json"].textures;
@@ -181,6 +196,12 @@
         }
       };
 
+      //Enter
+      enter.press = function() {
+        presionoEnter = true;
+      };
+
+
       //Para el mensaje al final
       texto = new Text(
         "In the End, it doesn't even matter",
@@ -225,7 +246,7 @@
     //Para el movimiento de los sprites
 
     function gameLoop(){
-        requestAnimationFrame(gameLoop);
+        idAnimation = requestAnimationFrame(gameLoop);
 
         //Actualizo el estado del juego
         state();
@@ -236,7 +257,7 @@
 
 
     function play(){
-
+      presionoEnter = false;
 
 
       //Le asigno una velocidad a cada eje del vikingo
@@ -270,12 +291,11 @@
 
       //Si el vikingHit esta en true, porque el viking chocó un tio:
       if(vikingHit) {
-
         //Make the viking semi-transparent
         viking.alpha = 0.5;
 
         //Reduce the width of the health bar's inner rectangle by 1 pixel
-        healthBar.outer.width -= 1;
+        healthBar.outer.width -= 2;
 
       } else {
 
@@ -300,7 +320,7 @@
         if (!tieneCapa && !tieneCorona) {
           rey = new Sprite(atlas["rey-100.png"]);
         } else if (tieneCapa && !tieneCorona) {
-            rey = new Sprite(atlas["rey-110.png"]);
+          rey = new Sprite(atlas["rey-110.png"]);
         } else if (!tieneCapa && tieneCorona){
           rey = new Sprite(atlas["rey-101.png"]);
         } else {
@@ -324,7 +344,7 @@
         if (!tieneBaston && !tieneCorona) {
           rey = new Sprite(atlas["rey-010.png"]);
         } else if (tieneBaston && !tieneCorona) {
-            rey = new Sprite(atlas["rey-110.png"]);
+          rey = new Sprite(atlas["rey-110.png"]);
         } else if (!tieneBaston && tieneCorona){
           rey = new Sprite(atlas["rey-011.png"]);
         } else {
@@ -348,7 +368,7 @@
         if (!tieneBaston && !tieneCapa) {
           rey = new Sprite(atlas["rey-001.png"]);
         } else if (tieneBaston && !tieneCapa) {
-            rey = new Sprite(atlas["rey-101.png"]);
+          rey = new Sprite(atlas["rey-101.png"]);
         } else if (!tieneBaston && tieneCapa){
           rey = new Sprite(atlas["rey-011.png"]);
         } else {
@@ -365,11 +385,11 @@
       //Ahora para decidir si el juego termina
       if (hitTestRectangle(rey, door)) {
         state = end;
-        texto.text = "PAV 2 Aprobada";
+        texto.text = "Aprobaste PAV 2 :V \n Presione ENTER para recursarla";
       }
       if (healthBar.outer.width <= 0) {
         state = end;
-        texto.text = "Vamo a recursar PAV >:V";
+        texto.text = "Vamo a recursar PAV >:V \n Presione ENTER para recursarla";
       }
 
     }
@@ -378,6 +398,18 @@
     function end(){
       gameScene.visible = false;
       gameOverScene.visible = true;
+
+      if (presionoEnter) {
+        presionoEnter = false;
+        gameScene.visible = true;
+        gameOverScene.visible = false;
+
+        while(gameScene.children[0]) {
+          gameScene.removeChild(gameScene.children[0]);
+        }
+        cancelAnimationFrame(idAnimation);
+        this.setup();
+      }
     }
 
     //Para mantener al explorer dentro del mapa se usa esta funcion
