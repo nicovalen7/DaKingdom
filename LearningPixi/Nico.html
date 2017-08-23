@@ -13,6 +13,7 @@
         loader = PIXI.loader,
         resources = PIXI.loader.resources,
         Sprite = PIXI.Sprite;
+        Text = PIXI.Text;
 
     document.body.appendChild(renderer.view);
 
@@ -27,12 +28,13 @@
     var state;
 
     //El mensaje a mostrar si perdemos
-    var message = new Text(
-      "Ya te chingaste wey",
-      {fontfamily: "Arial", fontsize: 64, fill: "black"}
-    );
-    message.position.set(32,32);
-    stage.addChild(message);
+    var texto;
+
+    //AHORA PARA MANEJAR LA INTERACCIÓN DEL EXPLORER CON EL TECLADO
+    var left = keyboard(37),
+      up = keyboard(38),
+      right = keyboard(39),
+      down = keyboard(40);
 
     //Esta funcion setup() corre cuando la imagen haya cargado
 
@@ -83,12 +85,6 @@
         blob.y = y;
         stage.addChild(blob);
       }
-
-      //AHORA PARA MANEJAR LA INTERACCIÓN DEL EXPLORER CON EL TECLADO
-      var left = keyboard(37),
-        up = keyboard(38),
-        right = keyboard(39),
-        down = keyboard(40);
 
       //Si se presiona cada tecla hago que se mueva para ese lado
       //Si se suelta hago que deje de moverse
@@ -143,6 +139,13 @@
           explorer.vy = 0;
         }
       };
+
+      texto = new Text(
+      "",
+      {fontFamily: "Arial", fontSize: 32, fill: "white"}
+      );
+      texto.position.set(100, 100);
+      stage.addChild(texto);
 
       //Seteo el estado del juego a "play", que es otra funcion que actualiza la posicion de los objetos
       state = play;
@@ -212,12 +215,16 @@
 
       //Checkeo colisiones
       if(hitTestRectangle(explorer,treasure)){
-        console.log(message);
-      }
-      else{
-
+        state = win;
       }
 
+    }
+
+    function win() {
+      explorer.vx = 0;
+      explorer.vy = 0;
+      texto.text = "Wiina chori";
+      renderer.render(stage);
     }
 
     //Funcion para detectar colisiones
