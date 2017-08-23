@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Somos Pixies, somos pixies</title>
+  <title>The Legend of King Corvalan</title>
 </head>
   <script src="pixi.min.js"></script>
 <body>
@@ -27,19 +27,24 @@
     document.body.appendChild(renderer.view);
 
     loader
-      .add("images/treasureHunter.json")
+      .add("images/theLegendOfCorvalan.json")
       .load(setup);
 
     //Defino las variables que uso en varias funciones
-    var dungeon, explorer, treasure, healthBar;
-    var blobs = [];
+    var atlas;
+    var dungeon, viking, rey, healthBar, baston, capa, corona, door;
+    var tieneCorona = false;
+    var tieneCapa = false;
+    var tieneBaston = false;
+    var reyVestido = false;
+    var tios = [];
 
 
 
     //Una variable para el estado del juego
     var state;
 
-    //El mensaje a mostrar si perdemos
+    //El mensaje a mostrar si perdemos o ganamos
     var texto;
 
     //AHORA PARA MANEJAR LA INTERACCIÓN DEL EXPLORER CON EL TECLADO
@@ -54,63 +59,76 @@
     function setup(){
 
       //Creamos una variable que referencie todo el atlas
-      var atlas = PIXI.loader.resources["images/treasureHunter.json"].textures;
+      atlas = PIXI.loader.resources["images/theLegendOfCorvalan.json"].textures;
 
       dungeon = new Sprite(atlas["dungeon.png"]);
       gameScene.addChild(dungeon);
 
-      treasure = new Sprite(atlas["treasure.png"]);
-      treasure.x = gameScene.width - treasure.width - 48;
-      treasure.y = gameScene.height / 2 - treasure.height / 2;
-      gameScene.addChild(treasure);
+      rey = new Sprite(atlas["rey-000.png"]);
+      rey.x = gameScene.width - rey.width - 48;
+      rey.y = gameScene.height / 2 - rey.height / 2;
+      gameScene.addChild(rey);
 
-      explorer = new Sprite(atlas["explorer.png"]);
-      explorer.x = 68;
-      explorer.y = gameScene.height / 2 - gameScene.height / 2;
-      gameScene.addChild(explorer);
+      viking = new Sprite(atlas["viking.png"]);
+      viking.x = 68;
+      viking.y = gameScene.height / 2 - gameScene.height / 2;
+      gameScene.addChild(viking);
       //Inicializo la velocidad del explorer en 0 (quieto)
-      explorer.vx = 0;
-      explorer.vy = 0;
+      viking.vx = 0;
+      viking.vy = 0;
 
       door = new Sprite(atlas["door.png"]);
       door.position.set(32,0);
       gameScene.addChild(door);
 
+      //Posicionamos los 3 objetos del rey de manera aleatoria
+      baston = new Sprite(atlas["baston.png"]);
+      baston.position.set(randomInt(100, stage.width - 64), randomInt(64, stage.height - 64));
+      gameScene.addChild(baston);
+
+      capa = new Sprite(atlas["capa.png"]);
+      capa.position.set(randomInt(100, stage.width - 64), randomInt(64, stage.height - 64));
+      gameScene.addChild(capa);
+
+      corona = new Sprite(atlas["corona.png"]);
+      corona.position.set(randomInt(100, stage.width - 64), randomInt(64, stage.height - 64));
+      gameScene.addChild(corona);
+
       //Para crear varios blobs y ubicarlos random
-      var numberOfBlobs = 6,
+      var numberOfTios = 6,
           spacing = 48,
           xOffSet = 150;
           speed = 2,
           direction = 1;
 
-      for (var i = 0; i < numberOfBlobs; i++) {
-        var blob = new Sprite(atlas["blob.png"]);
+      for (var i = 0; i < numberOfTios; i++) {
+        var tio = new Sprite(atlas["tio jr.png"]);
 
-        //Space each blob horizontally according to the `spacing` value.
+        //Space each tio jr horizontally according to the `spacing` value.
         //`xOffset` determines the point from the left of the screen
-        //at which the first blob should be added.
+        //at which the first tio jr should be added.
         var x = spacing * i + xOffSet;
 
-        //Le damos al blob una posicion Y random con la funcion randomInt()
+        //Le damos al tio jr una posicion 'Y' random con la funcion randomInt()
         //El 64 es para que no choque con el borde de arriba ni de abajo
         var y = randomInt(64, stage.height - 64);
 
-        //Le asignamos esas posiciones y lo agregamos al stage
-        blob.x = x;
-        blob.y = y;
+        //Le asignamos esas posiciones
+        tio.x = x;
+        tio.y = y;
 
         //La direccion 1 es para abajo, la -1 es para arriba
         //Lo multiplicamos por la velocidad y eso nos da su vy
-        blob.vy = speed * direction;
+        tio.vy = speed * direction;
 
-        //Revertimos la direccion para el sig blob
+        //Revertimos la direccion para el sig tio
         direction *= -1;
 
-        //Agregamos ese blob al arreglo blobs
-        blobs.push(blob);
+        //Agregamos ese tio al arreglo tios
+        tios.push(tio);
 
         //Y lo agregamos tambien al gameScene
-        gameScene.addChild(blob);
+        gameScene.addChild(tio);
       }
 
       //Si se presiona cada tecla hago que se mueva para ese lado
@@ -118,52 +136,48 @@
 
       //Left
       left.press = function(){
-        explorer.vx = -5;
-        explorer.vy = 0;
+        viking.vx = -3;
       };
 
       left.release = function(){
         //If the left arrow has been released, and the right arrow isn't down,
         //and the explorer isn't moving vertically:
         //Stop the cat
-        if (!right.isDown && explorer.vy === 0) {
-          explorer.vx = 0;
+        if (!right.isDown) {
+          viking.vx = 0;
         }
       };
 
       //Up
       up.press = function(){
-        explorer.vy = -5;
-        explorer.vx = 0
+        viking.vy = -3;
       };
 
       up.release = function(){
-        if(!down.isDown && explorer.vx == 0){
-          explorer.vy = 0;
+        if(!down.isDown){
+          viking.vy = 0;
         }
       };
 
       //Right
       right.press = function() {
-        explorer.vx = 5;
-        explorer.vy = 0;
+        viking.vx = 3;
       };
 
       right.release = function() {
-        if (!left.isDown && explorer.vy === 0) {
-          explorer.vx = 0;
+        if (!left.isDown) {
+          viking.vx = 0;
         }
       };
 
       //Down
       down.press = function() {
-        explorer.vy = 5;
-        explorer.vx = 0;
+        viking.vy = 3;
       };
 
       down.release = function() {
-        if (!up.isDown && explorer.vx === 0) {
-          explorer.vy = 0;
+        if (!up.isDown) {
+          viking.vy = 0;
         }
       };
 
@@ -222,64 +236,140 @@
 
 
     function play(){
-      //Le asigno una velocidad a cada eje del explorer
-      explorer.x += explorer.vx;
-      explorer.y += explorer.vy;
 
-      //Por defecto el explorer no choca nada
-      var explorerHit = false;
 
-      //Para mantener al explorer en el mapa
-      contain(explorer, {x: 28, y: 10, width: 488, height: 480});
 
-      //Para mover los blobs
-      blobs.forEach(function(blob) {
-      //Move the blob
-      blob.y += blob.vy;
-      //Checkeo si el blob choca alguna pared, esta variable devuelve "top" o "bottom" en esos casos
-      var blobHitsWall = contain(blob, {x: 28, y: 10, width: 488, height: 480});
-      //If the blob hits the top or bottom of the stage, reverse its direction
-      if (blobHitsWall === "top" || blobHitsWall === "bottom") {
-        blob.vy *= -1;
+      //Le asigno una velocidad a cada eje del vikingo
+      viking.x += viking.vx;
+      viking.y += viking.vy;
+
+      //Por defecto el vikingo no choca nada
+      var vikingHit = false;
+
+      //Para mantener al viking en el mapa
+      contain(viking, {x: 28, y: 10, width: 488, height: 480});
+
+      //Para mover los tios
+      tios.forEach(function(tio) {
+      //Move the tio jr
+      tio.y += tio.vy;
+      //Checkeo si el tio choca alguna pared, esta variable devuelve "top" o "bottom" en esos casos
+      var tioHitsWall = contain(tio, {x: 28, y: 10, width: 488, height: 480});
+      //If the tio hits the top or bottom of the stage, reverse its direction
+      if (tioHitsWall === "top" || tioHitsWall === "bottom") {
+        tio.vy *= -1;
       }
 
       //Test for a collision. If any of the enemies are touching
-      //the explorer, set `explorerHit` to `true`
-      if(hitTestRectangle(explorer, blob)) {
-        explorerHit = true;
+      //the viking, set `vikingHit` to `true`
+      if(hitTestRectangle(viking, tio)) {
+        vikingHit = true;
       }
 
       });
 
-      //Si el explorerHit esta en true, porque el explorer chocó un blob:
-      if(explorerHit) {
+      //Si el vikingHit esta en true, porque el viking chocó un tio:
+      if(vikingHit) {
 
-        //Make the explorer semi-transparent
-        explorer.alpha = 0.5;
+        //Make the viking semi-transparent
+        viking.alpha = 0.5;
 
         //Reduce the width of the health bar's inner rectangle by 1 pixel
         healthBar.outer.width -= 1;
 
       } else {
 
-        //Make the explorer fully opaque (non-transparent) if it hasn't been hit
-        explorer.alpha = 1;
+        //Make the viking fully opaque (non-transparent) if it hasn't been hit
+        viking.alpha = 1;
       }
 
-      //Si el explorer toca el treasure, entonces se lo lleva pa las casa
-      if (hitTestRectangle(explorer, treasure)) {
-        treasure.x = explorer.x + 8;
-        treasure.y = explorer.y + 8;
+      //Si el viking toca el rey, y el rey ya esta vestido, entonces se lo lleva pa las casa
+      if (hitTestRectangle(viking, rey) && reyVestido) {
+        rey.x = viking.x + 8;
+        rey.y = viking.y + 8;
+      }
+
+      //Toda la lógica para agarrar los objetos
+      //Baston
+      if (hitTestRectangle(viking, baston) && !tieneBaston) {
+        gameScene.removeChild(rey);
+        baston.visible = false;
+        gameScene.removeChild(baston);
+        tieneBaston = true;
+
+        if (!tieneCapa && !tieneCorona) {
+          rey = new Sprite(atlas["rey-100.png"]);
+        } else if (tieneCapa && !tieneCorona) {
+            rey = new Sprite(atlas["rey-110.png"]);
+        } else if (!tieneCapa && tieneCorona){
+          rey = new Sprite(atlas["rey-101.png"]);
+        } else {
+          rey = new Sprite(atlas["rey-111.png"]);
+          reyVestido = true;
+        }
+
+        rey.x = gameScene.width - rey.width - 48;
+        rey.y = gameScene.height / 2 - rey.height / 2;
+
+        gameScene.addChild(rey);
+      }
+
+      //Capa
+      if (hitTestRectangle(viking, capa) && !tieneCapa) {
+        gameScene.removeChild(rey);
+        capa.visible = false;
+        gameScene.removeChild(capa);
+        tieneCapa = true;
+
+        if (!tieneBaston && !tieneCorona) {
+          rey = new Sprite(atlas["rey-010.png"]);
+        } else if (tieneBaston && !tieneCorona) {
+            rey = new Sprite(atlas["rey-110.png"]);
+        } else if (!tieneBaston && tieneCorona){
+          rey = new Sprite(atlas["rey-011.png"]);
+        } else {
+          rey = new Sprite(atlas["rey-111.png"]);
+          reyVestido = true;
+        }
+
+        rey.x = gameScene.width - rey.width - 48;
+        rey.y = gameScene.height / 2 - rey.height / 2;
+
+        gameScene.addChild(rey);
+      }
+
+      //Corona
+      if (hitTestRectangle(viking, corona) && !tieneCorona) {
+        gameScene.removeChild(rey);
+        corona.visible = false;
+        gameScene.removeChild(corona);
+        tieneCorona = true;
+
+        if (!tieneBaston && !tieneCapa) {
+          rey = new Sprite(atlas["rey-001.png"]);
+        } else if (tieneBaston && !tieneCapa) {
+            rey = new Sprite(atlas["rey-101.png"]);
+        } else if (!tieneBaston && tieneCapa){
+          rey = new Sprite(atlas["rey-011.png"]);
+        } else {
+          rey = new Sprite(atlas["rey-111.png"]);
+          reyVestido = true;
+        }
+
+        rey.x = gameScene.width - rey.width - 48;
+        rey.y = gameScene.height / 2 - rey.height / 2;
+
+        gameScene.addChild(rey);
       }
 
       //Ahora para decidir si el juego termina
-      if (hitTestRectangle(treasure, door)) {
+      if (hitTestRectangle(rey, door)) {
         state = end;
-        texto.text = "Wiiina chori";
+        texto.text = "PAV 2 Aprobada";
       }
       if (healthBar.outer.width <= 0) {
         state = end;
-        texto.text = "Ya la chingaste qlia";
+        texto.text = "Vamo a recursar PAV >:V";
       }
 
     }
